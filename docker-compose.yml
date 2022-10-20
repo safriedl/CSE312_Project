@@ -1,13 +1,19 @@
-version: '3.5'
+version: '3.3'
 services:
-  database:
-    container_name: postgres
-    image: postgres:latest
-    env_file: database.conf
-    ports:
-      - 5432:5432
-    volumes:
-      - db_volume:/var/lib/postgresql
 
-volumes:
-  db_volume:
+  DB_postgreSQL:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: 'user345'
+      POSTGRES_PASSWORD: 'pasword345'
+      POSTGRES_DB: 'MathGameDB'
+    ports:
+      - '5432:5432'
+
+  app:
+   build: .
+   environment:
+    WAIT_HOSTS: DB_postgreSQL:5432
+   ports:
+     - '8080:8000'
