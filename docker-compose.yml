@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: 'user345'
-      POSTGRES_PASSWORD: 'pasword345'
+      POSTGRES_PASSWORD: 'password345'
       POSTGRES_DB: 'MathGameDB'
     ports:
       - '5432:5432'
