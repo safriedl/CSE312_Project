@@ -1,11 +1,15 @@
-FROM python:3
-
-ADD app.py /
-
-WORKDIR /app
+FROM python:3.9.5-slim
+ENV HOME /root
+WORKDIR /root
 
 COPY . .
 
-RUN pip3 install -r requirements.txt
+EXPOSE 8000
 
-CMD [ "python", "-u", "server.py", "database.py" ]
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
+RUN chmod +x /wait
+RUN pip3 install -r requirements.txt
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc \
+    && pip install psycopg2
+CMD /wait && python3 -u  app.py
