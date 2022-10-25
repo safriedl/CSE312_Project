@@ -4,19 +4,25 @@ import random
 class problem:
 
     
-    questions={}
+    question_set={}
 
-
-    def generate_basic():
-        question_types=["+","-","*","/"]
-        int_a=random.randint(1,1000)
-        int_b=random.randint(1,1000)
-        type=random.choice(question_types)
-        question=str(int_a)+" "+str(type)+" "+str(int_b)
+    #pandas
+    def generate_question():
+        operation_types=["+" , "-" , "*" , "/", "**"]
+        question_types=["(# & (# & #))",
+                        "((# & #) & (# & #))",
+                        "((# & (# & #)) & (# & #))"]
+        question=random.choice(question_types)
+        for i in question:
+            if i =="#":
+                question=question.replace(i,str(random.randint(1,10)),1)
+            if i =="&":
+                question=question.replace(i,str(random.choice(operation_types)),1)
         ans=eval(question)
-        problem.questions[question]=round(ans,4)
-    
+        problem.question_set[question]=round(ans,4)
+    def generator(num:int):
+        for i in range(num):
+            problem.generate_question()
 
-print("aa")
-
-
+problem.generator(10)
+print(problem.question_set)
