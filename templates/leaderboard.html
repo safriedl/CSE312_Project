@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile for {{ user }}</title>
+</head>
+<body>
+    <div>
+        {% for user in users %}
+        <p> {{user[1]}} | {{user[3]}}</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
