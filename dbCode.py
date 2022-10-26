@@ -46,7 +46,11 @@ def postgresql_system(operation, values=None, values2=None):
             data = cur.fetchone()
             result = data
 
-        # elif operation == "":
+        elif operation == "getLeaderboard":
+            get_script = '''SELECT distinct * FROM users ORDER BY gamesWon DESC fetch first 10 rows only'''
+            cur.execute(get_script, values)
+            data = cur.fetchall()
+            result = data
         # elif operation == "":
         # elif operation == "":
         # else:

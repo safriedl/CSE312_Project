@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profile for {{ user }}</title>
+    <title>Leaderboard!</title>
 </head>
 <body>
     <div>
         {% for user in users %}
-        <p> {{user[1]}} | {{user[3]}}</p>
+        <p> Username:{{user[1]}} | Score:{{user[3]}}</p>
         {% endfor %}
     </div>
 </body>

@@ -24,7 +24,7 @@ def h():
 
 @app.route('/leaderboard', methods=['GET'])
 def leader_board():
-    users = postgresql_system("allUsers")
+    users = postgresql_system("getLeaderboard")
     return render_template("leaderboard.html", users=users)  
 
 
