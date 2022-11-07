@@ -1,0 +1,50 @@
+[Flask / Python]
+General Information & Licensing
+Code Repository
+    https://github.com/pallets/flask.git
+License Type
+    three clause BSD License
+License Description
+    Allow to modify
+    Allow to distribute
+    Allow to place warranty
+License Restrictions
+    Not allow to use trademark
+    Not allow to hold liable
+
+
+
+
+Magic ⋆★͎۪۫｡˚۰˚☽˚⁀➷｡˚★彡͎۪۫⋆ ༄
+Dispel the magic of this technology. Replace this text with some that answers the following questions for the above tech:
+How does this technology do what it does? Please explain this in detail, starting from after the TCP socket is created
+Where is the specific code that does what you use the tech for? You must provide a link to the specific file in the repository for your tech with a line number or number range.
+If there is more than one step in the chain of calls (hint: there will be), you must provide links for the entire chain of calls from your code, to the library code that actually accomplishes the task for you.
+Example: If you use an object of type HttpRequest in your code which contains the headers of the request, you must show exactly how that object parsed the original headers from the TCP socket. This will often involve tracing through multiple libraries and you must show the entire trace through all these libraries with links to all the involved code.
+
+*This section will likely grow beyond the page
+—--------------------- first draft------------------------
+
+Flask as a web application framework not only be referenced as a micro framework 
+but also written in python which was familiar to all the members of the group. 
+Choosing it as our framework just makes things a lot easier. 
+
+Once a connection was created, Flask will provide users with the tools needed for 
+building a web application or in this case a response cycle. The application will 
+receive requests from the users and sends back a response based on the function in 
+the form of HTML, JSON, XML, etc.
+
+Flask is imported on the /app.py directory. What we currently have is a different 
+python decorator which checks and gives a response based on the route and the request type.
+For example, line 25 checks the URL and GET type and returns the leaderboard. 
+Similar for line 31, after the verification, the application then checks if the user exists. 
+If exists, it will provide an HTML page with the number of games wins and the total number of 
+games played by the user. We also state on line 42 that flask will run on our local host on port 80.
+
+
+
+
+
+
+
+
