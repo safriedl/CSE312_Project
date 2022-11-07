@@ -25,21 +25,31 @@ Example: If you use an object of type HttpRequest in your code which contains th
 *This section will likely grow beyond the page
 —--------------------- first draft------------------------
 
-Flask as a web application framework not only be referenced as a micro framework 
-but also written in python which was familiar to all the members of the group. 
-Choosing it as our framework just makes things a lot easier. 
+Flask as a web application framework not only be referenced as a micro framework but
+also written in python which was familiar to all the members of the group. Choosing 
+it as our framework just makes things a lot easier. 
 
 Once a connection was created, Flask will provide users with the tools needed for 
 building a web application or in this case a response cycle. The application will 
 receive requests from the users and sends back a response based on the function in 
 the form of HTML, JSON, XML, etc.
+https://github.com/pallets/flask/blob/main/src/flask/app.py
 
-Flask is imported on the /app.py directory. What we currently have is a different 
-python decorator which checks and gives a response based on the route and the request type.
-For example, line 25 checks the URL and GET type and returns the leaderboard. 
-Similar for line 31, after the verification, the application then checks if the user exists. 
-If exists, it will provide an HTML page with the number of games wins and the total number of 
-games played by the user. We also state on line 42 that flask will run on our local host on port 80.
+route(): decorator to tell Flask what URL should trigger our function.
+The function returns the message we want to display in the user’s browser
+https://github.com/pallets/flask/blob/main/src/flask/scaffold.py
+
+
+Flask is imported into the /app.py directory. What we currently have is a
+different python decorator which checks and gives a response based on the 
+route and the request type.
+
+line 25 checks the URL and GET type and returns the leaderboard. 
+
+line 31, after the verification, the application then checks if the user exists. 
+If exists, it will provide an HTML page with the number of games wins and the total number of games played by the user. 
+
+line 42 that flask will run on our local host on port 80.
 
 
 
