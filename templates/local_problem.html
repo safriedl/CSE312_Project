@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script type="text/javascript">
+        var answer = {{ ans }}
+    </script>
+    <script src="/scripts/localProblem.js"></script>
     <meta charset="UTF-8">
     <title>Problem for two users</title>
 </head>
@@ -9,13 +13,15 @@
         <p>Problem: {{ problem }}</p>
     </div>
 </body>
-<form>
+<form action="javascript: userSubmit(1)">
     <label for="user1">User 1:</label><br>
     <input type="text" id="user1" name="user1"><br>
     <input type="submit" value="Submit"><br>
+</form>
+<form action="javascript: userSubmit(2)">
     <label for="user2">User 2:</label><br>
     <input type="text" id="user2" name="user2"><br>
     <input type="submit" value="Submit"><br>
 </form>
-
-<small hidden>{{ answer }}</small>
+<br>
+<p id="response">No answer received yet!</p>

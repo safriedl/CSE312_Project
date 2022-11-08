@@ -5,7 +5,7 @@ question_set = {}
 
 # pandas
 def generate_question():
-    operation_types = ["+", "-", "*", "/", "**"]
+    operation_types = ["+", "-", "*", "/"]
     question_types = ["(# & (# & #))",
                       "((# & #) & (# & #))",
                       "((# & (# & #)) & (# & #))"]

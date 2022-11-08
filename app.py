@@ -1,4 +1,4 @@
-from flask import request, Flask, abort, render_template
+from flask import request, Flask, abort, render_template, send_from_directory
 
 from dbCode import *
 from problem import *
@@ -26,9 +26,15 @@ def leader_board():
     return render_template("leaderboard.html", users=users)
 
 @app.route('/localgame', methods=['GET'])
-def localGame():
+def local_game():
     problemTuple = generate_question()
-    return render_template("local_problem.html", problem=problemTuple[0], answer=problemTuple[1])
+    # REMOVE THE PRINT STATEMENT, DEBUG ONLY
+    print(problemTuple)
+    return render_template("local_problem.html", problem=problemTuple[0], ans=problemTuple[1])
+
+@app.route('/scripts/<script>')
+def serve_js(script):
+    return send_from_directory('scripts', script)
 
 @app.route('/profile/<user_name>', methods=['GET'])
 def hello(user_name):
