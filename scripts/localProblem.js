@@ -13,6 +13,6 @@ function userSubmit(id){
         }
     }
     else{
-        response.innerHTML = "Player " + id +"'s answer was wrong!"
+        response.innerHTML = "Player " + id +"'s answer was wrong!" + "Their answer was " + value
     }
 }

@@ -1,5 +1,5 @@
 
-from flask import request, Flask, abort, render_template, redirect
+from flask import request, Flask, abort, render_template, redirect, send_from_directory
 from flask_socketio import SocketIO
 
 from dbCode import *
@@ -31,6 +31,10 @@ def home():
 def leader_board():
     users = postgresql_system("getLeaderboard")
     return render_template("leaderboard.html", users=users)
+
+@app.route('/scripts/<script>')
+def serve_js(script):
+    return send_from_directory('scripts', script)
 
 @app.route('/localgame', methods=['GET'])
 def local_game():
