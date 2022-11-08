@@ -17,6 +17,8 @@ def generate_question():
             question = question.replace(i, str(random.choice(operation_types)), 1)
     ans = eval(question)
     question_set[question] = round(ans, 4)
+    # added a return to get a question for the local problem, as a tuple of (question, answer)
+    return (question, question_set[question])
 
 
 def generator(num: int):

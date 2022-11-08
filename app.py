@@ -1,6 +1,8 @@
 from flask import request, Flask, abort, render_template
 
 from dbCode import *
+from problem import *
+
 CreateTables()
 
 
@@ -27,6 +29,10 @@ def leader_board():
     users = postgresql_system("getLeaderboard")
     return render_template("leaderboard.html", users=users)  
 
+@app.route('/localgame', methods=['GET'])
+def localGame():
+    problemTuple = generate_question()
+    return render_template("local_problem.html", problem=problemTuple[0], answer=problemTuple[1])
 
 @app.route('/profile/<user_name>', methods=['GET'])
 def hello(user_name):
