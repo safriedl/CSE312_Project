@@ -40,16 +40,63 @@ The function returns the message we want to display in the user’s browser
 https://github.com/pallets/flask/blob/main/src/flask/scaffold.py
 
 
-Flask is imported into the /app.py directory. What we currently have is a
-different python decorator which checks and gives a response based on the 
-route and the request type.
+Flask as a web application framework not only be referenced as a micro framework but 
+also written in python which was familiar to all the members of the group. Choosing it 
+as our framework just makes things a lot easier. 
 
-line 25 checks the URL and GET type and returns the leaderboard. 
+Once a connection was created, Flask will provide users with the tools needed for building 
+a web application or in this case a response cycle. The application will receive requests 
+from the users and sends back a response based on the function in the form of HTML, JSON, XML, etc.
+https://github.com/pallets/flask/blob/main/src/flask/app.py
 
-line 31, after the verification, the application then checks if the user exists. 
-If exists, it will provide an HTML page with the number of games wins and the total number of games played by the user. 
+route(): decorator to tell Flask what URL should trigger our function.
+Mainly used with render_template() to display in the user’s browser
+https://github.com/pallets/flask/blob/main/src/flask/scaffold.py#L423
 
-line 42 that flask will run on our local host on port 80.
+render_template(): Render a template by name with the given context by calling the _render() function. 
+Most of the time it will be rendering HTML based on what route() decoded
+https://github.com/pallets/flask/blob/main/src/flask/templating.py#L135
+
+_render(): Update and returns the newly templet
+https://github.com/pallets/flask/blob/main/src/flask/templating.py#L127
+
+send_from_directory(): Returns send_from_directory from werkzeug library
+Send a file from within a directory using:func:`send_file`
+https://github.com/pallets/flask/blob/main/src/flask/helpers.py#552
+
+send_file(): process and send the content to the client
+https://github.com/pallets/werkzeug/blob/main/src/werkzeug/utils.py#549
+
+request.args(): returns parsed url as ~werkzeug.datastructures.ImmutableMultiDict
+https://github.com/pallets/werkzeug/blob/main/src/werkzeug/sansio/request.py#170
+
+redirect() 
+
+trace 
+
+Flask is imported into the /app.py directory. What we currently have is multiple 
+python decorator which checks and gives a response based on the route and the request type.
+
+line 25 checks the URL and GET type. 
+Returns the home_page HTML by calling render_template(). 
+
+line 30, checks the URL and GET type. Execute postgresql_system() based on the operator. 
+In this case, operation is "getLeaderboard" returns the top 10 users with the highest win rate.
+Returns the leaderboard HTML by calling render_template(). The leaderboard.html has been updated with the top 10 users.
+
+line35 gets the javascript information by calling send_from_directory()
+
+line39 checks the URL and GET type. Creates a tuple of questions by calling generate_question(). 
+Update and returns the local_problem HTML with the newly generated question by calling render_template(). 
+
+line46 checks the URL and GET type. Execute postgresql_system() based on the operator. 
+In this case, the operation is “getUser”. This checks if the user id exists and updates the user_profile_template HTML with the user’s info by calling render_template() else return 404. 
+Information includes the number of wins and games played.
+
+line57, function for users to join the game lobby. It receives users' IDs by calling request.args from flask and checks for existing lobbies if the id is verified in the database.
+returns a redirect() function with url.
+line84, flask will run with socket on port 80.
+
 
 
 
