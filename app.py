@@ -85,5 +85,10 @@ def lobby(lobby_num):
                            async_mode=socket.async_mode)
 
 
+def escape_html(text):
+    """Returns a version of the input string with escaped html."""
+    return text.replace('&', '&amp').replace('<', '&lt').replace('>', '&gt')
+
+
 if __name__ == "__main__":
     socket.run(app, host='0.0.0.0', port=8000, debug=True, allow_unsafe_werkzeug=True)

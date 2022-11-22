@@ -2,9 +2,20 @@ import psycopg2
 
 
 def postgresql_system(operation, values=None, values2=None):
+    """Connects to the database and executes pre-built queries, with the option of two values as parameters.
+        The queries are:
+            addUsers) Adds a user where value1=username, value2=password\n
+
+            addPoint) Increments a user's gamesWon value, where value1=username
+
+            allUsers) Returns the entire users table
+
+            getUser) Returns all the data from the table of a user, where value1=username
+
+            getLeaderboard) Returns all data from the leaderboard table sorted by gamesWon"""
     result = None
     # Connecting to db. May need to change if setting up to connect to a local db.
-    DBhost = "DB_postgreSQL"
+    db_host = "DB_postgreSQL"
     database = "MathGameDB"
     username = "user345"
     pwd = "password345"
@@ -14,7 +25,7 @@ def postgresql_system(operation, values=None, values2=None):
     cur = None
     try:
         conn = psycopg2.connect(
-            host=DBhost,
+            host=db_host,
             dbname=database,
             user=username,
             password=pwd,
@@ -103,4 +114,4 @@ def CreateTables():
             cur.close()
         if conn is not None:
             conn.close()
-    #return result
+    # return result
