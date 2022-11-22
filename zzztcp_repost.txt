@@ -1,0 +1,82 @@
+[Flask / Python]
+General Information & Licensing
+Code Repository
+    https://github.com/pallets/flask.git
+License Type
+    three clause BSD License
+License Description
+    Allow to modify
+    Allow to distribute
+    Allow to place warranty
+License Restrictions
+    Not allow to use trademark
+    Not allow to hold liable
+
+
+
+
+Magic ⋆★͎۪۫｡˚۰˚☽˚⁀➷｡˚★彡͎۪۫⋆ ༄
+Dispel the magic of this technology. Replace this text with some that answers the following questions for the above tech:
+How does this technology do what it does? Please explain this in detail, starting from after the TCP socket is created
+Where is the specific code that does what you use the tech for? You must provide a link to the specific file in the repository for your tech with a line number or number range.
+If there is more than one step in the chain of calls (hint: there will be), you must provide links for the entire chain of calls from your code, to the library code that actually accomplishes the task for you.
+Example: If you use an object of type HttpRequest in your code which contains the headers of the request, you must show exactly how that object parsed the original headers from the TCP socket. This will often involve tracing through multiple libraries and you must show the entire trace through all these libraries with links to all the involved code.
+
+*This section will likely grow beyond the page
+—--------------------- first draft------------------------
+
+Flask will provide users with the tools needed for building 
+a web application or in this case a response cycle. The application will receive requests 
+from the users and sends back a response based on the function in the form of HTML, JSON, XML, etc.
+https://github.com/pallets/flask/blob/main/src/flask/app.py
+
+Flask is imported into the /app.py directory. What we currently have is multiple python 
+decorator which checks and gives a response based on the route and the request type.
+
+The decorator we use to check URLs is route().
+route():  it is a decorator to tell Flask what URL should trigger our function. 
+It also calls add_url_rule() which sets the view function to the endpoint.
+
+route()
+https://github.com/pallets/flask/blob/main/src/flask/scaffold.py#L423
+add_url_rule()
+https://github.com/pallets/flask/blob/main/src/flask/scaffold.py#L455
+
+
+Once the route is triggered, we execute the functions that were decided for the 
+URL and send back an updated HTML page.
+
+The information used for updates are generated with postgresql_system function 
+form /dbCode.py directory. What it does is it sets a connection between the server 
+and the data base with psycopg2. 
+
+These datas were updated to the pages by using render_template()
+
+ _render(): It updates the context by calling update_template_context() than 
+ returns the template string which updated by render().
+https://github.com/pallets/flask/blob/main/src/flask/templating.py#L135
+
+update_template_context(): Update the template context with some commonly used variables.
+https://github.com/pallets/flask/blob/main/src/flask/app.py#L973
+
+render(): take the input dictionary that have already applied by update_template_context(), 
+and returns the templet as string.
+https://github.com/pallets/jinja/blob/main/src/jinja2/environment.py#L1269 
+
+We also used send_from_directory() to present javascript.  
+send_from_directory(): this serves the file within the directory. During the process, 
+it also calls the  ~werkzeug.security.safe_join.
+send_from_directory()
+https://github.com/pallets/flask/blob/main/src/flask/helpers.py#L552
+send_from_directory() / werkzeug
+https://github.com/pallets/werkzeug/blob/main/src/werkzeug/utils.py549
+
+werkzeug.security.safe_join(): Make sure the client cant reach other directories 
+besides the base directory and prevent security issues
+https://github.com/pallets/werkzeug/blob/main/src/werkzeug/security.py#L110
+
+send_file(): process and send the content to the client
+https://github.com/pallets/werkzeug/blob/main/src/werkzeug/utils.py#L329
+
+flask-request.args(): returns parsed url as ~werkzeug.datastructures.ImmutableMultiDict by using url_decode()
+https://github.com/pallets/werkzeug/blob/main/src/werkzeug/sansio/request.py#L170

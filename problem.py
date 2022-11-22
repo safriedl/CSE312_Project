@@ -6,9 +6,7 @@ question_set = {}
 # pandas
 def generate_question():
     operation_types = ["+", "-", "*", "/"]
-    question_types = ["(# & (# & #))",
-                      "((# & #) & (# & #))",
-                      "((# & (# & #)) & (# & #))"]
+    question_types = ["# & #"]
     question = random.choice(question_types)
     for i in question:
         if i == "#":
