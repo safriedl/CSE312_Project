@@ -16,7 +16,7 @@ def generate_question():
     ans = eval(question)
     question_set[question] = round(ans, 4)
     # added a return to get a question for the local problem, as a tuple of (question, answer)
-    return (question, question_set[question])
+    return question, question_set[question]
 
 
 def generator(num: int):
