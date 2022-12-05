@@ -41,13 +41,21 @@ def postgresql_system(operation, values=None, values2=None):
             tuple = cur.fetchone()
             result = tuple
 
+        elif operation == "addUsersFull":
+            insert_script = 'INSERT INTO users (username, password, salt, gamesWon, gamesPlayed) VALUES (%s, %s, %s, %s, %s)'  # add username.
+            cur.execute(insert_script, values)
+
+            cur.execute('SELECT * FROM users where username = %s', (values[1],))  # return added username.
+            tuple = cur.fetchone()
+            result = tuple
+
         elif operation == "addPoint":
             update_script = '''UPDATE users SET gamesWon = gamesWon + 1 
                                 where username = %s'''
             cur.execute(update_script, (values2,))
 
         elif operation == "allUsers":
-            cur.execute('SELECT * FROM users', ())
+            cur.execute('SELECT username FROM users', ())
             tuple = cur.fetchall()
             result = tuple
 
@@ -101,9 +109,10 @@ def CreateTables():
         create_user = ''' CREATE TABLE IF NOT EXISTS users (
             id serial Primary Key NOT NULL,
             username varchar(40),
-            password varchar(30),
+            password varchar(100),
+            salt varchar(50),
             gamesWon Int default 0,
-            gamesPLayed Int default 0)'''
+            gamesPlayed Int default 0)'''
         cur.execute(create_user)
 
         conn.commit()

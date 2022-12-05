@@ -1,6 +1,6 @@
 const io = require("socket.io-client");
+const jq = require("jquery");
 
-let socket = io("ws://localhost:8080");
-    socket.on('connect', function() {
-        socket.emit('joined', {data: ''});
-    });
+$(document).ready(function(){
+    var socket = io();
+});
