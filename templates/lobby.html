@@ -5,8 +5,18 @@
     <title>Math Duel Lobby</title>
 </head>
 <body>
+    <p id="this_user">Welcome: {{ user }}</p>
     <p>Lobby Number: {{ num }}</p>
-    <p>Players : {{ names }}</p>
+    <p>Players: {{ names }}</p>
+
+    <div id="chat"></div>
+
+    <form id="answer" method="POST" action=''>
+        <input type="text" name="answer_question" id="answer_question">
+        <input type="submit" value="Answer">
+    </form>
+
+
 
 
 </body>
@@ -14,13 +24,55 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
-            var socket = io("http://localhost:8080/lobby/{{ num }}");
+            let socket = io("http://localhost:8080");
 
-            // Event handler for new connections.
-            // The callback function is invoked when a connection with the
-            // server is established.
+            let answer = "";
+
+            let gameOver = false;
+
             socket.on('connect', function() {
-                socket.emit('my_event', {data: 'I\'m connected!'});
+                socket.emit("join", { "username": "{{ user }}", "room": "{{ num }}" });
+            });
+
+            socket.on('joined', function(msg) {
+                let chat = $('#chat');
+                let data = JSON.parse(msg);
+                chat.append("<p>" + data["username"] + " has joined the lobby!" + "</p>");
+                alert(data["room_size"]);
+                if(data["room_size"] === "2"){
+                    chat.append("<p>" + "TWO PLAYERS JOINED, THE GAME HAS STARTED!" + "</p>");
+                    socket.emit("get_problem", {'room': "{{ num }}"});
+                }
+            });
+
+            socket.on('problem', function(msg) {
+                console.log("getting problem");
+                let problem = JSON.parse(msg);
+                let question = problem['question'];
+                answer = problem['answer'];
+                alert("THE PROBLEM IS: " + question);
+            });
+
+            socket.on('answered_incorrect', function(msg) {
+                let chat = $('#chat');
+                chat.append("<p>" + msg + "</p>");
+            });
+
+            socket.on('answered_correct', function(msg) {
+                let chat = $('#chat');
+                let data = JSON.parse(msg);
+                chat.append("<p>" + data["username"] + " has answered " + data["answer"] + "and they are CORRECT!" + "</p>");
+                chat.append("<h1>GAME OVER</h1>");
+                gameOver = true;
+                if("{{ user }}" === data["username"]){
+                    socket.emit("solved", {"winner": data["username"]});
+                }
+                socket.emit("leave");
+            });
+
+            $('form#answer').submit(function(event) {
+                socket.emit('validate_answer', {"answer": $('#answer_question').val(), "correct": answer, "user": "{{ user }}", "room": "{{ num }}"});
+                return false;
             });
         });
     </script>
