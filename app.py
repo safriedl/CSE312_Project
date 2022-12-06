@@ -64,35 +64,6 @@ def home():
                 <input id="password" type="text" name="password">
                 <input type="submit" value="login">
             </form style="background-color:#1E90FF;>'''
-            
-    if auToken in userTokens: #Then authenitcated.
-        loginForm = '''<h1>New User? Sign-Up:</h1>
-        <form action="/sign-up" id="sign-up" method="post">
-
-            <label for="username">Username: </label>
-            <input id="username" type="text" name="username">
-
-            <br />
-            <label for="password">Password: </label>
-            <input id="password" type="text" name="password">
-            <input type="submit" value="sign-up">
-
-        </form style="background-color:aquamarine;>
-
-
-
-        <h1>Or login:</h1>
-        <form action="/login" id="login" method="post">
-
-            <label for="username">Username: </label>
-            <input id="username" type="text" name="username">
-
-            <br />
-            <label for="password">Password: </label>
-            <input id="password" type="text" name="password">
-            <input type="submit" value="login">
-
-        </form style="background-color:#1E90FF;>'''
 
     else:
         loginForm = "<p style='background-color:red;' >You are currently not logged in, please sign-up and login to play the game.</p>"
