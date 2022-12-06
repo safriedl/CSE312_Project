@@ -3,6 +3,7 @@ import json
 from flask import request, Flask, abort, render_template, redirect, send_from_directory, send_file, url_for, make_response
 from flask_socketio import SocketIO, join_room, leave_room, send, emit
 
+
 from dbCode import *
 from problem import *
 
@@ -31,9 +32,18 @@ userTokens = []
 # 1 Served at the path /, loads up the homepage, and sets the homepage as unauthorized and needs to log in, or already logged in.
 
 
+
+
+
+
+
+#New Code
+userTokens = []
+#1 Served at the path /, loads up the homepage, and sets the homepage as unauthorized and needs to log in, or already logged in.
 @app.route('/', methods=['GET'])
 def home():
     auToken = request.cookies.get('userAuToken')
+
 
     if auToken in userTokens:  # Then authenitcated.
         loginForm = '''<h1>New User? Sign-Up:</h1>
@@ -54,11 +64,40 @@ def home():
                 <input id="password" type="text" name="password">
                 <input type="submit" value="login">
             </form style="background-color:#1E90FF;>'''
-        return render_template("home_page.html", loginForm=loginForm)
+            
+    if auToken in userTokens: #Then authenitcated.
+        loginForm = '''<h1>New User? Sign-Up:</h1>
+        <form action="/sign-up" id="sign-up" method="post">
+
+            <label for="username">Username: </label>
+            <input id="username" type="text" name="username">
+
+            <br />
+            <label for="password">Password: </label>
+            <input id="password" type="text" name="password">
+            <input type="submit" value="sign-up">
+
+        </form style="background-color:aquamarine;>
+
+
+
+        <h1>Or login:</h1>
+        <form action="/login" id="login" method="post">
+
+            <label for="username">Username: </label>
+            <input id="username" type="text" name="username">
+
+            <br />
+            <label for="password">Password: </label>
+            <input id="password" type="text" name="password">
+            <input type="submit" value="login">
+
+        </form style="background-color:#1E90FF;>'''
 
     else:
         loginForm = "<p style='background-color:red;' >You are currently not logged in, please sign-up and login to play the game.</p>"
         return render_template("home_page.html ", loginForm=loginForm)
+
     # return render_template("home_page.html")
     # Note that this route, /, does not add or change auTokens or signs up or logs in users, etc. ust checks if users authenticated or not.
 
@@ -98,6 +137,45 @@ def login():
 
 
 # End of NewCode.
+=======
+    #return render_template("home_page.html")
+    #Note that this route, /, does not add or change auTokens or signs up or logs in users, etc. ust checks if users authenticated or not.
+
+
+#automatically signs up users and adds them to the db.
+def sign_up():
+   user = request.form['username']
+   pwd = request.form['password']  #***Should hash pwd.
+
+   userInfo = (user, pwd, "salt", 0, 0)  #(id, username, password, salt, gamesWon, gamesPlayed)
+   result = postgresql_system("addUsersFull", userInfo )
+   
+   #Now user successfully signed-up, return to homepage.
+   return redirect(url_for('/'))
+
+
+
+def login():
+   user_name = request.form['username']
+   pwd = request.form['password']
+   info = postgresql_system("getUser", user_name)
+   if info[2] == pwd: #***should hash pwd.
+       #Then authenticated, serve homepage again with setting the cookie.
+
+       ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
+       auth_token = ''.join([random.choice(ALL_CHARS) for _ in range(30)])
+       result = postgresql_system("Update_auth_token", auth_token, user_name)
+
+
+       loginForm = "<p style='background-color:#0000A0;' >Login Success, click start to join a lobby and begin a match.</p>"
+       resp = make_response(render_template("home_page.html", loginForm=loginForm)) #sets in the http headers earlier here.
+       resp.set_cookie('userAuToken', auth_token) #Set the cookie in the http respone.
+       return resp #Now, users are logged in, and accessing any route will check if they have an auth_token, and serve custom responses. For example, requesting homepage will serve logged in homepage.
+
+   else:
+       redirect(url_for('/')) #Redirect to homepage, just like after signing up, without setting the auToken. Can also serve homepage and set loginForm to state that incorrect pwd entered.
+#End of NewCode.
+
 
 
 @app.route('/leaderboard', methods=['GET'])

@@ -70,7 +70,11 @@ def postgresql_system(operation, values=None, values2=None):
             cur.execute(get_script, values)
             data = cur.fetchall()
             result = data
-        # elif operation == "":
+
+        elif operation == "Update_auth_token":
+            update_script = '''UPDATE users SET auToken = %s
+                                where username = %s'''
+            cur.execute(update_script, (values, values2))
         # elif operation == "":
         # else:
         conn.commit()
@@ -112,8 +116,14 @@ def CreateTables():
             password varchar(100),
             salt varchar(50),
             gamesWon Int default 0,
-            gamesPlayed Int default 0)'''
+            gamesPlayed Int default 0),
+            auth_token varchar(200)'''
         cur.execute(create_user)
+
+
+
+
+
 
         conn.commit()
     except Exception as error:
