@@ -54,6 +54,7 @@ def home():
                 <input id="password" type="text" name="password">
                 <input type="submit" value="login">
             </form style="background-color:#1E90FF;>'''
+        return render_template("home_page.html", loginForm=loginForm)
 
     else:
         loginForm = "<p style='background-color:red;' >You are currently not logged in, please sign-up and login to play the game.</p>"
@@ -93,7 +94,7 @@ def login():
         return resp  # Now, users are logged in, and accessing any route will check if they have an auth_token, and serve custom responses. For example, requesting homepage will serve logged in homepage.
 
     else:
-        redirect(url_for(
+        return redirect(url_for(
             '/'))  # Redirect to homepage, just like after signing up, without setting the auToken. Can also serve homepage and set loginForm to state that incorrect pwd entered.
 
 
