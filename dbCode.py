@@ -1,6 +1,22 @@
 import psycopg2
 
 
+
+
+# Connecting to Database. May need to change if setting up to connect to a local repo.
+'''db_host = "DB_postgreSQL"
+database = "MathGameDB"
+username = "user345"
+pwd = "password345"
+port_id = 5432'''
+
+db_host = "127.0.0.1"
+database = "cse312Hw"
+username = "nofle"
+pwd = "admins"
+port_id = 5432
+
+
 def postgresql_system(operation, values=None, values2=None):
     """Connects to the database and executes pre-built queries, with the option of two values as parameters.
         The queries are:
@@ -14,12 +30,6 @@ def postgresql_system(operation, values=None, values2=None):
 
             getLeaderboard) Returns all data from the leaderboard table sorted by gamesWon"""
     result = None
-    # Connecting to db. May need to change if setting up to connect to a local db.
-    db_host = "DB_postgreSQL"
-    database = "MathGameDB"
-    username = "user345"
-    pwd = "password345"
-    port_id = 5432
 
     conn = None
     cur = None
@@ -41,8 +51,8 @@ def postgresql_system(operation, values=None, values2=None):
             tuple = cur.fetchone()
             result = tuple
 
-        elif operation == "addUsersFull":
-            insert_script = 'INSERT INTO users (username, password, salt, gamesWon, gamesPlayed) VALUES (%s, %s, %s, %s, %s)'  # add username.
+        if operation == "addUsersFull":
+            insert_script = 'INSERT INTO users (username, password, salt, gamesWon, gamesPlayed, auth_token) VALUES (%s, %s, %s, %s, %s, %s)'  # add username.
             cur.execute(insert_script, values)
 
             cur.execute('SELECT * FROM users where username = %s', (values[1],))  # return added username.
@@ -55,13 +65,13 @@ def postgresql_system(operation, values=None, values2=None):
             cur.execute(update_script, (values2,))
 
         elif operation == "allUsers":
-            cur.execute('SELECT username FROM users', ())
+            cur.execute('SELECT * FROM users', ())
             tuple = cur.fetchall()
             result = tuple
 
         elif operation == "getUser":
             get_script = '''SELECT * FROM users WHERE username = %s'''
-            cur.execute(get_script, values)
+            cur.execute(get_script, (values,))
             data = cur.fetchone()
             result = data
 
@@ -72,7 +82,7 @@ def postgresql_system(operation, values=None, values2=None):
             result = data
 
         elif operation == "Update_auth_token":
-            update_script = '''UPDATE users SET auToken = %s
+            update_script = '''UPDATE users SET auth_token = %s
                                 where username = %s'''
             cur.execute(update_script, (values, values2))
         # elif operation == "":
@@ -89,19 +99,12 @@ def postgresql_system(operation, values=None, values2=None):
 
 
 def CreateTables():
-    result = None
-    # Connecting to Database. May need to change if setting up to connect to a local repo.
-    DBhost = "DB_postgreSQL"
-    database = "MathGameDB"
-    username = "user345"
-    pwd = "password345"
-    port_id = 5432
 
     conn = None
     cur = None
     try:
         conn = psycopg2.connect(
-            host=DBhost,
+            host=db_host,
             dbname=database,
             user=username,
             password=pwd,
@@ -109,15 +112,15 @@ def CreateTables():
         )
         cur = conn.cursor()
 
-        # cur.execute("DROP TABLE IF EXISTS users") #will clear the table.
+        #cur.execute("DROP TABLE IF EXISTS users") #will clear the table.
         create_user = ''' CREATE TABLE IF NOT EXISTS users (
             id serial Primary Key NOT NULL,
             username varchar(40),
             password varchar(100),
             salt varchar(50),
             gamesWon Int default 0,
-            gamesPlayed Int default 0),
-            auth_token varchar(200)'''
+            gamesPlayed Int default 0,
+            auth_token varchar(200) )'''
         cur.execute(create_user)
 
 
