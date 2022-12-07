@@ -1,5 +1,6 @@
 import hashlib
 import json
+import geventwebsocket
 
 from flask import request, Flask, abort, render_template, redirect, send_from_directory, send_file, url_for, \
     make_response
@@ -180,7 +181,7 @@ def join_lobby():
             lobbies.append([username])
             connected.append([])
             answers.append(0)
-            return render_template("lobby.html", user=username, num=len(lobbies) - 1, names=", ".join(lobbies[int(len(lobbies) - 1)]),
+            return render_template("lobby.html", user=username, num=len(lobbies) - 1,
                                    async_mode=socket.async_mode)
         else:
             for lob in sorted(lobbies, key=lambda x: len(x), reverse=True):
@@ -188,7 +189,6 @@ def join_lobby():
                     if username not in lob:
                         lob.append(username)
                         return render_template("lobby.html", user=username, num=lobbies.index(lob),
-                                               names=", ".join(lobbies[int(lobbies.index(lob))]),
                                                async_mode=socket.async_mode)
     else:
         return "You must logged in to join a lobby."
@@ -197,14 +197,6 @@ def join_lobby():
 @app.route('/functions.js')
 def send_functions():
     return send_file('functions.js', "text/javascript")
-
-
-@app.route('/lobby/<lobby_num>')
-def lobby(lobby_num):
-    args = request.args.to_dict()
-    username = args.get("name")
-    return render_template("lobby.html", user=username, num=lobby_num, names=", ".join(lobbies[int(lobby_num)]),
-                           async_mode=socket.async_mode)
 
 
 @socket.on('join')
@@ -271,4 +263,4 @@ def clear_room(data):
 
 
 if __name__ == "__main__":
-    socket.run(app, host='0.0.0.0', port=8000, debug=True, log_output=True, allow_unsafe_werkzeug=True)
+    socket.run(app, host='0.0.0.0', port=8000, debug=True, log_output=True)
