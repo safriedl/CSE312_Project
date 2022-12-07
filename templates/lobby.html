@@ -26,8 +26,6 @@
         $(document).ready(function() {
             let socket = io("http://localhost:8080");
 
-            let answer = "";
-
             let gameOver = false;
 
             socket.on('connect', function() {
@@ -38,10 +36,9 @@
                 let chat = $('#chat');
                 let data = JSON.parse(msg);
                 chat.append("<p>" + data["username"] + " has joined the lobby!" + "</p>");
-                alert(data["room_size"]);
-                if(data["room_size"] === "2"){
+                if(data["room_size"] === "2" || data["room_size"] === 2){
                     chat.append("<p>" + "TWO PLAYERS JOINED, THE GAME HAS STARTED!" + "</p>");
-                    socket.emit("get_problem", {'room': "{{ num }}"});
+                    if("{{ user }}" === data["username"]) socket.emit("get_problem", {'room': "{{ num }}"});
                 }
             });
 
@@ -49,7 +46,6 @@
                 console.log("getting problem");
                 let problem = JSON.parse(msg);
                 let question = problem['question'];
-                answer = problem['answer'];
                 alert("THE PROBLEM IS: " + question);
             });
 
@@ -61,17 +57,20 @@
             socket.on('answered_correct', function(msg) {
                 let chat = $('#chat');
                 let data = JSON.parse(msg);
-                chat.append("<p>" + data["username"] + " has answered " + data["answer"] + "and they are CORRECT!" + "</p>");
+                chat.append("<p>" + data["user"] + " has answered " + data["answer"] + " and they are CORRECT!" + "</p>");
                 chat.append("<h1>GAME OVER</h1>");
                 gameOver = true;
-                if("{{ user }}" === data["username"]){
-                    socket.emit("solved", {"winner": data["username"]});
+                if("{{ user }}" === data["user"]){
+                    socket.emit("solved_and_won", {"winner": data["user"]});
                 }
-                socket.emit("leave");
+                else{
+                    socket.emit("solved_and_lost", {"loser": "{{ user }}"});
+                }
+                socket.emit("clear_room", {"room": "{{ num }}"});
             });
 
             $('form#answer').submit(function(event) {
-                socket.emit('validate_answer', {"answer": $('#answer_question').val(), "correct": answer, "user": "{{ user }}", "room": "{{ num }}"});
+                socket.emit('validate_answer', {"answer": $('#answer_question').val(), "user": "{{ user }}", "room": "{{ num }}"});
                 return false;
             });
         });

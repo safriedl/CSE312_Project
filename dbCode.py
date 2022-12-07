@@ -1,8 +1,5 @@
 import psycopg2
 
-
-
-
 # Connecting to Database. May need to change if setting up to connect to a local repo.
 db_host = "DB_postgreSQL"
 database = "MathGameDB"
@@ -15,13 +12,9 @@ def postgresql_system(operation, values=None, values2=None):
     """Connects to the database and executes pre-built queries, with the option of two values as parameters.
         The queries are:
             addUsers) Adds a user where value1=username, value2=password\n
-
             addPoint) Increments a user's gamesWon value, where value1=username
-
             allUsers) Returns the entire users table
-
             getUser) Returns all the data from the table of a user, where value1=username
-
             getLeaderboard) Returns all data from the leaderboard table sorted by gamesWon"""
     result = None
 
@@ -45,7 +38,7 @@ def postgresql_system(operation, values=None, values2=None):
             tuple = cur.fetchone()
             result = tuple
 
-        if operation == "addUsersFull":
+        elif operation == "addUsersFull":
             insert_script = 'INSERT INTO users (username, password, salt, gamesWon, gamesPlayed, auth_token) VALUES (%s, %s, %s, %s, %s, %s)'  # add username.
             cur.execute(insert_script, values)
 
@@ -58,8 +51,18 @@ def postgresql_system(operation, values=None, values2=None):
                                 where username = %s'''
             cur.execute(update_script, (values2,))
 
+        elif operation == "addPlayed":
+            update_script = '''UPDATE users SET gamesPlayed = gamesPlayed + 1 
+                                where username = %s'''
+            cur.execute(update_script, (values2,))
+
         elif operation == "allUsers":
             cur.execute('SELECT * FROM users', ())
+            tuple = cur.fetchall()
+            result = tuple
+
+        elif operation == "allUsernames":
+            cur.execute('SELECT username FROM users', ())
             tuple = cur.fetchall()
             result = tuple
 
@@ -79,6 +82,13 @@ def postgresql_system(operation, values=None, values2=None):
             update_script = '''UPDATE users SET auth_token = %s
                                 where username = %s'''
             cur.execute(update_script, (values, values2))
+
+        elif operation == "getUserByAuthToken":
+            insert_script = 'SELECT username from users where auth_token = %s'  # add username.
+            cur.execute(insert_script, (values,))
+
+            tuple = cur.fetchone()
+            result = tuple
         # elif operation == "":
         # else:
         conn.commit()
@@ -116,12 +126,6 @@ def CreateTables():
             gamesPlayed Int default 0,
             auth_token varchar(200) )'''
         cur.execute(create_user)
-
-
-
-
-
-
         conn.commit()
     except Exception as error:
         print(error)
