@@ -4,16 +4,10 @@ import psycopg2
 
 
 # Connecting to Database. May need to change if setting up to connect to a local repo.
-'''db_host = "DB_postgreSQL"
+db_host = "DB_postgreSQL"
 database = "MathGameDB"
 username = "user345"
 pwd = "password345"
-port_id = 5432'''
-
-db_host = "127.0.0.1"
-database = "cse312Hw"
-username = "nofle"
-pwd = "admins"
 port_id = 5432
 
 
