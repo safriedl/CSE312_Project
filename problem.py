@@ -13,3 +13,6 @@ def generate_question():
             question = question.replace(i, str(random.choice(operation_types)), 1)
     ans = eval(question)
     return question, round(ans, 4)
+
+def example():
+    print('example')

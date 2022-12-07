@@ -7,8 +7,10 @@ from flask_socketio import SocketIO, join_room, leave_room, send, emit
 
 from dbCode import *
 from problem import *
+import hashlib
 
 CreateTables()
+
 
 '''user1 = postgresql_system("addUsersFull", ("a", "xyz", "b", 3, 4))
 user2 = postgresql_system("addUsersFull", ("b", "xyz", "b", 7, 129))
@@ -26,9 +28,6 @@ connected = []
 answers = []
 
 lobby_counter = 0
-
-# New Code
-userTokens = []
 
 
 def escape_html(text):
@@ -78,7 +77,7 @@ def sign_up():
     saltedandhashedpwd = hashlib.sha256(pwd.encode() + saltB).hexdigest()
 
     userInfo = (
-        user, saltedandhashedpwd, salt, 0, 0, None)  # (id, username, password, salt, gamesWon, gamesPlayed, auToken)
+    user, saltedandhashedpwd, salt, 0, 0, None)  # (id, username, password, salt, gamesWon, gamesPlayed, auToken)
     result = postgresql_system("addUsersFull", userInfo)
 
     # Now user successfully signed-up, return to homepage.
@@ -128,9 +127,9 @@ def profile():
     auth_token = request.cookies.get('userAuToken')  # 1. get auToken.
 
     info = getUserWithToken(
-        auth_token) if auth_token is not None else None  # 2. get user_info for the auToken, if auToken exists and valid.
+        auth_token) if auth_token != None else None  # 2. get user_info for the auToken, if auToken exists and valid.
     print("USER", info)
-    if info is not None:  # 3. Then authenticated.
+    if info != None:  # 3. Then authenticated.
         username = info[1]
         wins = info[4]
         games_played = info[5]
@@ -143,10 +142,11 @@ def profile():
 
 # --END OF NEW EDITED CODE--
 
+
 @app.route('/leaderboard', methods=['GET'])
 def leader_board():
     users = postgresql_system("getLeaderboard")
-    return render_template("leaderboard.html", users=users)
+    return render_template("leaderboard.html", users=users) #Works now.
 
 
 @app.route('/scripts/<script>')
@@ -154,6 +154,7 @@ def serve_js(script):
     return send_from_directory('scripts', script)
 
 
+#--Live Game Management--
 @app.route('/localgame', methods=['GET'])
 def local_game():
     problemTuple = generate_question()
@@ -178,7 +179,6 @@ def join_lobby():
         if lobbies_open == 0:
             lobbies.append([username])
             connected.append([])
-            answers.append(0)
             return redirect(f"/lobby/{len(lobbies) - 1}?name={username}", 302)
         else:
             for lob in sorted(lobbies, key=lambda x: len(x), reverse=True):
@@ -205,7 +205,7 @@ def lobby(lobby_num):
 
 @socket.on('join')
 def on_join(data):
-    username = escape_html(data['username'])
+    username = data['username']
     room = data['room']
     if username not in connected[int(room)]:
         join_room(room)  # adds current user to room
@@ -225,45 +225,20 @@ def get_problem(data):
     room = data['room']
     qst, ans = generate_question()
     print(f"QUESTION: {qst}, ANSWER: {ans}", flush=True)
-    answers[int(room)] = ans
     emit("problem", json.dumps({'question': qst, 'answer': ans}), to=room)
 
 
 @socket.event
 def validate_answer(data):
-    username = escape_html(data["user"])
+    username = data["user"]
     room = data["room"]
-    answer = escape_html(data["answer"])
+    answer = data["answer"]
+    correct = data["correct"]
     print(data, flush=True)
-    print(answers, flush=True)
-    if int(answer) != int(answers[int(room)]):
+    if answer != correct:
         emit("answered_incorrect", f"{username} guesses {answer}. They are INCORRECT!", to=room)
     else:
-        emit("answered_correct", json.dumps({"user": username, "answer": answers[int(room)]}), to=room)
-
-
-@socket.event
-def solved_and_won(data):
-    user = data["winner"]
-    print(data, flush=True)
-    postgresql_system("addPoint", values2=user)
-    postgresql_system("addPlayed", values2=user)
-
-
-@socket.event
-def solved_and_lost(data):
-    user = data["loser"]
-    print(data, flush=True)
-    postgresql_system("addPlayed", values2=user)
-
-
-@socket.event
-def clear_room(data):
-    room = int(data["room"])
-    leave_room(data["room"])
-    lobbies[room] = []
-    connected[room] = []
-    answers[room] = 0
+        emit("answered_correct", json.dumps({"user": username, "answer": correct}), to=room)
 
 
 if __name__ == "__main__":
