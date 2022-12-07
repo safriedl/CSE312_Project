@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 from flask import request, Flask, abort, render_template, redirect, send_from_directory, send_file, url_for, \
@@ -10,7 +11,6 @@ import hashlib
 
 CreateTables()
 
-# calls to insert data.
 '''user1 = postgresql_system("addUsersFull", ("a", "xyz", "b", 3, 4))
 user2 = postgresql_system("addUsersFull", ("b", "xyz", "b", 7, 129))
 user3 = postgresql_system("addUsersFull", ("c", "xyz", "b", 5, 69))
@@ -24,12 +24,9 @@ lobbies = []  # list of groups of max size 2
 
 connected = []
 
+answers = []
+
 lobby_counter = 0
-
-
-
-
-
 
 def escape_html(text):
     """Returns a version of the input string with escaped html."""
@@ -56,13 +53,14 @@ def home():
 
     user = getUserWithToken(auth_token) if auth_token != None else None
     print("USER", user)
+
     if user != None: #Then authenitcated.
         username = user[1]
         return render_template("home_page_au.html", user=username)
 
     else:
         return render_template("home_page.html", replace="You've accessed the landing page.")
-    #Note that this route, /, does not add or change auTokens or signs up or logs in users, etc. just checks if users authenticated or not.
+        #Note that this route, /, does not add or change auTokens or signs up or logs in users, etc. just checks if users authenticated or not.
 
 
 #Automatically signs up users and adds them to the db.
@@ -137,6 +135,8 @@ def profile():
 #--END OF NEW EDITED CODE--
 
 
+# --END OF NEW EDITED CODE--
+
 @app.route('/leaderboard', methods=['GET'])
 def leader_board():
     users = postgresql_system("getLeaderboard")
@@ -149,8 +149,6 @@ def serve_js(script):
 
 
 
-
-
 #--Live Game Management--
 @app.route('/localgame', methods=['GET'])
 def local_game():
@@ -159,7 +157,6 @@ def local_game():
     print("hi")
     print(problemTuple)
     return render_template("local_problem.html", problem=problemTuple[0], ans=problemTuple[1])
-
 
 
 @app.route('/lobby')
@@ -177,6 +174,7 @@ def join_lobby():
         if lobbies_open == 0:
             lobbies.append([username])
             connected.append([])
+            answers.append(0)
             return redirect(f"/lobby/{len(lobbies) - 1}?name={username}", 302)
         else:
             for lob in sorted(lobbies, key=lambda x: len(x), reverse=True):
@@ -203,7 +201,7 @@ def lobby(lobby_num):
 
 @socket.on('join')
 def on_join(data):
-    username = data['username']
+    username = escape_html(data['username'])
     room = data['room']
     if username not in connected[int(room)]:
         join_room(room)  # adds current user to room
@@ -223,23 +221,46 @@ def get_problem(data):
     room = data['room']
     qst, ans = generate_question()
     print(f"QUESTION: {qst}, ANSWER: {ans}", flush=True)
+    answers[int(room)] = ans
     emit("problem", json.dumps({'question': qst, 'answer': ans}), to=room)
 
 
 @socket.event
 def validate_answer(data):
-    username = data["user"]
+    username = escape_html(data["user"])
     room = data["room"]
-    answer = data["answer"]
-    correct = data["correct"]
+    answer = escape_html(data["answer"])
     print(data, flush=True)
-    if answer != correct:
+    print(answers, flush=True)
+    if int(answer) != int(answers[int(room)]):
         emit("answered_incorrect", f"{username} guesses {answer}. They are INCORRECT!", to=room)
     else:
-        emit("answered_correct", json.dumps({"user": username, "answer": correct}), to=room)
+        emit("answered_correct", json.dumps({"user": username, "answer": answers[int(room)]}), to=room)
 
+@socket.event
+def solved_and_won(data):
+    user = data["winner"]
+    print(data, flush=True)
+    postgresql_system("addPoint", values2=user)
+    postgresql_system("addPlayed", values2=user)
+
+
+@socket.event
+def solved_and_lost(data):
+    user = data["loser"]
+    print(data, flush=True)
+    postgresql_system("addPlayed", values2=user)
+
+
+@socket.event
+def clear_room(data):
+    room = int(data["room"])
+    leave_room(data["room"])
+    lobbies[room] = []
+    connected[room] = []
+    answers[room] = 0
 
 
 
 if __name__ == "__main__":
-    socket.run(app, host='0.0.0.0', port=8000, debug=True, log_output=True)
+    socket.run(app, host='0.0.0.0', port=8000, debug=True, log_output=True, allow_unsafe_werkzeug=True)

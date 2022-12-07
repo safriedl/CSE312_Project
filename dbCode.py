@@ -45,8 +45,8 @@ def postgresql_system(operation, values=None, values2=None):
             tuple = cur.fetchone()
             result = tuple
 
-        if operation == "addUsersFull":
-            insert_script = 'INSERT INTO users (username, password, salt, gamesWon, gamesPlayed, auth_token) VALUES (%s, %s, %s, %s, %s, %s)'  # add username.
+        elif operation == "addUsersFull":
+            insert_script = 'INSERT INTO users (username, password, salt, gamesWon, gamesPlayed, authToken) VALUES (%s, %s, %s, %s, %s, %s)'  # add username.
             cur.execute(insert_script, values)
 
             cur.execute('SELECT * FROM users where username = %s', (values[1],))  # return added username.
@@ -56,7 +56,12 @@ def postgresql_system(operation, values=None, values2=None):
         elif operation == "addPoint":
             update_script = '''UPDATE users SET gamesWon = gamesWon + 1 
                                 where username = %s'''
-            cur.execute(update_script, (values2,))
+            cur.execute(update_script, values2)
+
+        elif operation == "addPlayed":
+            update_script = '''UPDATE users SET gamesPlayed = gamesPlayed + 1 
+                                where username = %s'''
+            cur.execute(update_script, values2)
 
         elif operation == "allUsers":
             cur.execute('SELECT * FROM users', ())
@@ -76,7 +81,7 @@ def postgresql_system(operation, values=None, values2=None):
             result = data
 
         elif operation == "Update_auth_token":
-            update_script = '''UPDATE users SET auth_token = %s
+            update_script = '''UPDATE users SET authToken = %s
                                 where username = %s'''
             cur.execute(update_script, (values, values2))
         # elif operation == "":
@@ -106,22 +111,16 @@ def CreateTables():
         )
         cur = conn.cursor()
 
-        #cur.execute("DROP TABLE IF EXISTS users") #will clear the table.
-        create_user = ''' CREATE TABLE IF NOT EXISTS users (
+        # cur.execute("DROP TABLE IF EXISTS users") #will clear the table.
+        create_user = '''CREATE TABLE IF NOT EXISTS users (
             id serial Primary Key NOT NULL,
-            username varchar(40),
+            username varchar(40) UNIQUE,
             password varchar(100),
             salt varchar(50),
             gamesWon Int default 0,
             gamesPlayed Int default 0,
-            auth_token varchar(200) )'''
+            authToken varchar(200));'''
         cur.execute(create_user)
-
-
-
-
-
-
         conn.commit()
     except Exception as error:
         print(error)

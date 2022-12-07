@@ -11,6 +11,5 @@ RUN chmod +x /wait
 RUN pip3 install -r requirements.txt
 RUN apt-get update \
     && apt-get -y install libpq-dev gcc \
-    && pip install psycopg2 \
-    && pip install gevent-websocket
+    && pip install psycopg2
 CMD /wait && python -u app.py
