@@ -7,6 +7,7 @@ from flask_socketio import SocketIO, join_room, leave_room, send, emit
 
 from dbCode import *
 from problem import *
+import hashlib
 
 CreateTables()
 
@@ -27,118 +28,111 @@ answers = []
 
 lobby_counter = 0
 
-# New Code
-userTokens = []
-
-
 def escape_html(text):
     """Returns a version of the input string with escaped html."""
     return text.replace('&', '&amp').replace('<', '&lt').replace('>', '&gt')
 
-
-# --NEW EDITED CODE--
-# Given the token, get user all info. May be used by any route that requires checking if user is authenticated and requires getting the user info.
+#--NEW EDITED CODE--
+#Given the token, get user all info. May be used by any route that requires checking if user is authenticated and requires getting the user info.
 def getUserWithToken(auToken):
-    hashed_auth_token = hashlib.sha256(auToken.encode()).hexdigest()
-    print(hashed_auth_token)
-    users = postgresql_system("allUsers")
-    for u in users:
-        print(u)
-        if u[6] == hashed_auth_token:
-            return u  # u = #(id, username, password, salt, gamesWon, gamesPlayed, auToken)
-    print("END")
-    return None
+     hashed_auth_token = hashlib.sha256( auToken.encode() ).hexdigest()
+     print(hashed_auth_token)
+     users = postgresql_system("allUsers")
+     for u in users:
+         print(u)
+         if u[6] == hashed_auth_token:
+             return u #u = #(id, username, password, salt, gamesWon, gamesPlayed, auToken)
+     print("END")
+     return None
 
 
-# 1 Served at the path /, loads up the homepage, and sets the homepage as unauthorized and needs to log in, or already logged in.
+#1 Served at the path /, loads up the homepage, and sets the homepage as unauthorized and needs to log in, or already logged in.
 @app.route('/', methods=['GET'])
 def home():
     auth_token = request.cookies.get('userAuToken')
 
     user = getUserWithToken(auth_token) if auth_token != None else None
     print("USER", user)
-    if user != None:  # Then authenitcated.
+
+    if user != None: #Then authenitcated.
         username = user[1]
         return render_template("home_page_au.html", user=username)
 
     else:
         return render_template("home_page.html", replace="You've accessed the landing page.")
-    # Note that this route, /, does not add or change auTokens or signs up or logs in users, etc. just checks if users authenticated or not.
+        #Note that this route, /, does not add or change auTokens or signs up or logs in users, etc. just checks if users authenticated or not.
 
 
-# Automatically signs up users and adds them to the db.
-@app.route('/signup', methods=['POST', 'GET'])
+#Automatically signs up users and adds them to the db.
+@app.route('/signup', methods = ['POST', 'GET'])
 def sign_up():
-    user = request.form['username']
-    pwd = request.form['password']  # ***Should hash pwd.
+   user = request.form['username']
+   pwd = request.form['password']  #***Should hash pwd.
 
-    ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
-    salt = ''.join([random.choice(ALL_CHARS) for _ in range(10)])
-    saltB = salt.encode()
-    saltedandhashedpwd = hashlib.sha256(pwd.encode() + saltB).hexdigest()
+   ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
+   salt = ''.join([random.choice(ALL_CHARS) for _ in range(10)])
+   saltB = salt.encode()
+   saltedandhashedpwd = hashlib.sha256(pwd.encode() + saltB).hexdigest()
 
-    userInfo = (
-        user, saltedandhashedpwd, salt, 0, 0, None)  # (id, username, password, salt, gamesWon, gamesPlayed, auToken)
-    result = postgresql_system("addUsersFull", userInfo)
-
-    # Now user successfully signed-up, return to homepage.
-    return render_template("home_page.html",
-                           replace="You've successfully signed-up and registered an account, now you can sign-in to play!")
+   userInfo = (user, saltedandhashedpwd, salt, 0, 0, None)  #(id, username, password, salt, gamesWon, gamesPlayed, auToken)
+   result = postgresql_system("addUsersFull", userInfo)
+   
+   #Now user successfully signed-up, return to homepage.
+   return render_template("home_page.html", replace="You've successfully signed-up and registered an account, now you can sign-in to play!")
 
 
-@app.route('/login', methods=['POST', 'GET'])
+
+@app.route('/login', methods = ['POST', 'GET'])
 def login():
-    user_name = request.form['username']
-    pwd = request.form['password']
+   user_name = request.form['username']
+   pwd = request.form['password']
 
-    info = postgresql_system("getUser", user_name)
+   info = postgresql_system("getUser", user_name)
 
-    if info == None:  # When an auToken value doesn't exist in db.
-        return render_template("home_page.html",
-                               replace="Incorrect username or password, please login or sign-up with a new account.")  # <- This also notifies user of login error, instead of redirect('/', 302)
-    # else user info exists in db.
+   if info == None: #When an auToken value doesn't exist in db.
+       return render_template("home_page.html", replace="Incorrect username or password, please login or sign-up with a new account.") #<- This also notifies user of login error, instead of redirect('/', 302)
+   #else user info exists in db.
 
-    salt = info[3]
-    saltB = salt.encode()
-    saltedandhashedpwd = hashlib.sha256(pwd.encode() + saltB).hexdigest()
+   salt = info[3]
+   saltB = salt.encode()
+   saltedandhashedpwd = hashlib.sha256(pwd.encode() + saltB).hexdigest()
 
-    if info[2] == saltedandhashedpwd:
-        # Then authenticated, serve homepage again with setting the cookie.
+   if info[2] == saltedandhashedpwd:
+       #Then authenticated, serve homepage again with setting the cookie.
 
-        ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
-        auth_token = ''.join([random.choice(ALL_CHARS) for _ in range(30)])
+       ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
+       auth_token = ''.join([random.choice(ALL_CHARS) for _ in range(30)])
 
-        hashed_auth_token = hashlib.sha256(auth_token.encode()).hexdigest()
-        result = postgresql_system("Update_auth_token", hashed_auth_token, user_name)
-
-        resp = make_response(
-            render_template("home_page_au.html", username=info[1]))  # sets in the http headers earlier here.
-        resp.set_cookie('userAuToken', auth_token)  # Set the cookie in the http response.
-        return resp  # Now, users are logged in, and accessing any route will check if they have an auth_token, and serve custom responses. For example, requesting homepage will serve authorized homepage with username shown.
-
-    else:
-        return render_template("home_page.html",
-                               replace="Incorrect username or password, please login or sign-up with a new account.")
-        # Redirect to homepage, just like after signing up, without setting the auToken. Can also serve homepage and set loginForm to state that incorrect pwd entered. -Already done.
+       hashed_auth_token = hashlib.sha256( auth_token.encode() ).hexdigest()
+       result = postgresql_system("Update_auth_token", hashed_auth_token, user_name)
 
 
-# has been modified it to directly use the auth_token instead.
+       resp = make_response(render_template("home_page_au.html", username=info[1])) #sets in the http headers earlier here.
+       resp.set_cookie('userAuToken', auth_token) #Set the cookie in the http response.
+       return resp #Now, users are logged in, and accessing any route will check if they have an auth_token, and serve custom responses. For example, requesting homepage will serve authorized homepage with username shown.
+
+   else:
+       return render_template("home_page.html", replace = "Incorrect username or password, please login or sign-up with a new account.")
+       #Redirect to homepage, just like after signing up, without setting the auToken. Can also serve homepage and set loginForm to state that incorrect pwd entered. -Already done.
+
+
+
+#has been modified it to directly use the auth_token instead.
 @app.route('/profile', methods=['GET'])
 def profile():
-    auth_token = request.cookies.get('userAuToken')  # 1. get auToken.
+    auth_token = request.cookies.get('userAuToken') #1. get auToken.
 
-    info = getUserWithToken(
-        auth_token) if auth_token is not None else None  # 2. get user_info for the auToken, if auToken exists and valid.
+    info = getUserWithToken(auth_token) if auth_token != None else None #2. get user_info for the auToken, if auToken exists and valid.
     print("USER", info)
-    if info is not None:  # 3. Then authenticated.
+    if info != None: #3. Then authenticated.
         username = info[1]
         wins = info[4]
         games_played = info[5]
         return render_template('user_profile_template.html', wins=wins, played=games_played, user=username)
 
     else:
-        return render_template("home_page.html",
-                               replace="Please Login first to access your profile.")  # abort(404) #or may send a redirect to homepage.
+        return render_template("home_page.html", replace="Please Login first to access your profile.")#abort(404) #or may send a redirect to homepage.
+#--END OF NEW EDITED CODE--
 
 
 # --END OF NEW EDITED CODE--
@@ -146,7 +140,7 @@ def profile():
 @app.route('/leaderboard', methods=['GET'])
 def leader_board():
     users = postgresql_system("getLeaderboard")
-    return render_template("leaderboard.html", users=users)
+    return render_template("leaderboard.html", users=users) #Works now.
 
 
 @app.route('/scripts/<script>')
@@ -154,6 +148,8 @@ def serve_js(script):
     return send_from_directory('scripts', script)
 
 
+
+#--Live Game Management--
 @app.route('/localgame', methods=['GET'])
 def local_game():
     problemTuple = generate_question()
@@ -241,7 +237,6 @@ def validate_answer(data):
     else:
         emit("answered_correct", json.dumps({"user": username, "answer": answers[int(room)]}), to=room)
 
-
 @socket.event
 def solved_and_won(data):
     user = data["winner"]
@@ -264,6 +259,7 @@ def clear_room(data):
     lobbies[room] = []
     connected[room] = []
     answers[room] = 0
+
 
 
 if __name__ == "__main__":

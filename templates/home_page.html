@@ -8,13 +8,41 @@
     <div style="padding: 10px; background-color: #00ffa7; margin: 20px">
         <p style="font-size: 20px">WELCOME TO MATH DUELS</p>
     </div>
-    <a href="https://localhost:8080/lobby">Join Game</a>
+
+
+    <p style='background-color:red;'>You are currently not logged in, please sign-up and login to play the game.</p>
+
+
+    <h1>New User? Sign-Up:</h1>
+    <form action="/signup" id="sign-up" method="post">
+
+        <label for="username">Username: </label>
+        <input id="username" type="text" name="username">
+
+        <br />
+        <label for="password">Password: </label>
+        <input id="password" type="text" name="password">
+        <input type="submit" value="sign-up">
+
+    </form>
 
 
 
+    <br />
+    <h1>Or login:</h1>
+    <form action="/login" id="login" method="post">
 
-    {loginForm}
+        <label for="username">Username: </label>
+        <input id="username" type="text" name="username">
 
+        <br />
+        <label for="password">Password: </label>
+        <input id="password" type="text" name="password">
+        <input type="submit" value="login">
+
+    </form>
+
+    <p><i><b> {{ replace }} </i></b></p>
 
 </body>
 </html>

@@ -1,6 +1,16 @@
 import psycopg2
 
 
+
+
+# Connecting to Database. May need to change if setting up to connect to a local repo.
+db_host = "DB_postgreSQL"
+database = "MathGameDB"
+username = "user345"
+pwd = "password345"
+port_id = 5432
+
+
 def postgresql_system(operation, values=None, values2=None):
     """Connects to the database and executes pre-built queries, with the option of two values as parameters.
         The queries are:
@@ -14,12 +24,6 @@ def postgresql_system(operation, values=None, values2=None):
 
             getLeaderboard) Returns all data from the leaderboard table sorted by gamesWon"""
     result = None
-    # Connecting to db. May need to change if setting up to connect to a local db.
-    db_host = "DB_postgreSQL"
-    database = "MathGameDB"
-    username = "user345"
-    pwd = "password345"
-    port_id = 5432
 
     conn = None
     cur = None
@@ -60,13 +64,13 @@ def postgresql_system(operation, values=None, values2=None):
             cur.execute(update_script, values2)
 
         elif operation == "allUsers":
-            cur.execute('SELECT username FROM users', ())
+            cur.execute('SELECT * FROM users', ())
             tuple = cur.fetchall()
             result = tuple
 
         elif operation == "getUser":
             get_script = '''SELECT * FROM users WHERE username = %s'''
-            cur.execute(get_script, values)
+            cur.execute(get_script, (values,))
             data = cur.fetchone()
             result = data
 
@@ -94,19 +98,12 @@ def postgresql_system(operation, values=None, values2=None):
 
 
 def CreateTables():
-    result = None
-    # Connecting to Database. May need to change if setting up to connect to a local repo.
-    DBhost = "DB_postgreSQL"
-    database = "MathGameDB"
-    username = "user345"
-    pwd = "password345"
-    port_id = 5432
 
     conn = None
     cur = None
     try:
         conn = psycopg2.connect(
-            host=DBhost,
+            host=db_host,
             dbname=database,
             user=username,
             password=pwd,
