@@ -51,8 +51,18 @@ def postgresql_system(operation, values=None, values2=None):
                                 where username = %s'''
             cur.execute(update_script, (values2,))
 
+        elif operation == "addPlayed":
+            update_script = '''UPDATE users SET gamesPlayed = gamesPlayed + 1 
+                                where username = %s'''
+            cur.execute(update_script, (values2,))
+
         elif operation == "allUsers":
             cur.execute('SELECT * FROM users', ())
+            tuple = cur.fetchall()
+            result = tuple
+
+        elif operation == "allUsernames":
+            cur.execute('SELECT username FROM users', ())
             tuple = cur.fetchall()
             result = tuple
 
@@ -72,6 +82,13 @@ def postgresql_system(operation, values=None, values2=None):
             update_script = '''UPDATE users SET auth_token = %s
                                 where username = %s'''
             cur.execute(update_script, (values, values2))
+
+        elif operation == "getUserByAuthToken":
+            insert_script = 'SELECT username from users where auth_token = %s'  # add username.
+            cur.execute(insert_script, (values,))
+
+            tuple = cur.fetchone()
+            result = tuple
         # elif operation == "":
         # else:
         conn.commit()

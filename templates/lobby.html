@@ -36,7 +36,6 @@
                 let chat = $('#chat');
                 let data = JSON.parse(msg);
                 chat.append("<p>" + data["username"] + " has joined the lobby!" + "</p>");
-                alert(data["room_size"]);
                 if(data["room_size"] === "2" || data["room_size"] === 2){
                     chat.append("<p>" + "TWO PLAYERS JOINED, THE GAME HAS STARTED!" + "</p>");
                     if("{{ user }}" === data["username"]) socket.emit("get_problem", {'room': "{{ num }}"});

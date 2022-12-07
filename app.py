@@ -166,28 +166,32 @@ def local_game():
 
 @app.route('/lobby')
 def join_lobby():
-    args = request.args.to_dict()
     print("made it to lobby", flush=True)
-    print(args, flush=True)
-    username = args.get("name")
-    print(username)
-    users = list(map(lambda x: x[0], postgresql_system("allUsers")))
-    print(users, flush=True)
-    if username in users:
+    cookies = request.cookies
+    print(cookies, flush=True)
+    auth_token = cookies.get('userAuToken')
+    hashed_auth_token = hashlib.sha256(auth_token.encode()).hexdigest()
+    username = postgresql_system("getUserByAuthToken", values=hashed_auth_token)[0]
+    print(f"FOUND USERNAME: {username}", flush=True)
+    if username is not None:
         lobbies_open = sum(1 for lob in lobbies if len(lob) != 2)
         print(f"LOBBIES OPEN: {lobbies_open}", flush=True)
         if lobbies_open == 0:
             lobbies.append([username])
             connected.append([])
-            return redirect(f"/lobby/{len(lobbies) - 1}?name={username}", 302)
+            answers.append(0)
+            return render_template("lobby.html", user=username, num=len(lobbies) - 1, names=", ".join(lobbies[int(len(lobbies) - 1)]),
+                                   async_mode=socket.async_mode)
         else:
             for lob in sorted(lobbies, key=lambda x: len(x), reverse=True):
                 if len(lob) < 2:
                     if username not in lob:
                         lob.append(username)
-                        return redirect(f"/lobby/{lobbies.index(lob)}?name={username}", 302)
+                        return render_template("lobby.html", user=username, num=lobbies.index(lob),
+                                               names=", ".join(lobbies[int(lobbies.index(lob))]),
+                                               async_mode=socket.async_mode)
     else:
-        return "You must register to join a lobby."
+        return "You must logged in to join a lobby."
 
 
 @app.route('/functions.js')
@@ -225,6 +229,7 @@ def get_problem(data):
     room = data['room']
     qst, ans = generate_question()
     print(f"QUESTION: {qst}, ANSWER: {ans}", flush=True)
+    answers[int(room)] = ans
     emit("problem", json.dumps({'question': qst, 'answer': ans}), to=room)
 
 
@@ -233,12 +238,36 @@ def validate_answer(data):
     username = data["user"]
     room = data["room"]
     answer = data["answer"]
-    correct = data["correct"]
     print(data, flush=True)
-    if answer != correct:
+    print(answers, flush=True)
+    if int(answer) != int(answers[int(room)]):
         emit("answered_incorrect", f"{username} guesses {answer}. They are INCORRECT!", to=room)
     else:
-        emit("answered_correct", json.dumps({"user": username, "answer": correct}), to=room)
+        emit("answered_correct", json.dumps({"user": username, "answer": answers[int(room)]}), to=room)
+
+
+@socket.event
+def solved_and_won(data):
+    user = data["winner"]
+    print(data, flush=True)
+    postgresql_system("addPoint", values2=user)
+    postgresql_system("addPlayed", values2=user)
+
+
+@socket.event
+def solved_and_lost(data):
+    user = data["loser"]
+    print(data, flush=True)
+    postgresql_system("addPlayed", values2=user)
+
+
+@socket.event
+def clear_room(data):
+    room = int(data["room"])
+    leave_room(data["room"])
+    lobbies[room] = []
+    connected[room] = []
+    answers[room] = 0
 
 
 if __name__ == "__main__":
