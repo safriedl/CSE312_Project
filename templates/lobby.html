@@ -5,6 +5,7 @@
     <title>Math Duel Lobby</title>
 </head>
 <body>
+    <h2>DO NOT REFRESH!</h2>
     <p id="this_user">Welcome: {{ user }}</p>
     <p>Lobby Number: {{ num }}</p>
     <a href="/">Home</a>
@@ -43,10 +44,11 @@
             });
 
             socket.on('problem', function(msg) {
-                console.log("getting problem");
                 let problem = JSON.parse(msg);
                 let question = problem['question'];
-                alert("THE PROBLEM IS: " + question);
+                //alert("THE PROBLEM IS: " + question);
+                let chat = $('#chat');
+                chat.append("<h1>" + "THE PROBLEM IS: " + question + "</h1>");
             });
 
             socket.on('answered_incorrect', function(msg) {
