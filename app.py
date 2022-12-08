@@ -182,14 +182,14 @@ def join_lobby():
             connected.append([])
             answers.append(0)
             return render_template("lobby.html", user=username, num=len(lobbies) - 1,
-                                   async_mode=socket.async_mode)
+                                   async_mode="gevent")
         else:
             for lob in sorted(lobbies, key=lambda x: len(x), reverse=True):
                 if len(lob) < 2:
                     if username not in lob:
                         lob.append(username)
                         return render_template("lobby.html", user=username, num=lobbies.index(lob),
-                                               async_mode=socket.async_mode)
+                                               async_mode="gevent")
     else:
         return "You must logged in to join a lobby."
 
