@@ -13,6 +13,8 @@ import hashlib
 CreateTables()
 
 
+
+
 '''user1 = postgresql_system("addUsersFull", ("a", "xyz", "b", 3, 4))
 user2 = postgresql_system("addUsersFull", ("b", "xyz", "b", 7, 129))
 user3 = postgresql_system("addUsersFull", ("c", "xyz", "b", 5, 69))
@@ -66,24 +68,37 @@ def home():
     # Note that this route, /, does not add or change auTokens or signs up or logs in users, etc. just checks if users authenticated or not.
 
 
-# Automatically signs up users and adds them to the db.
-@app.route('/signup', methods=['POST', 'GET'])
+#Automatically signs up users and adds them to the db.  <- Not Anymore.
+@app.route('/signup', methods = ['POST', 'GET'])
 def sign_up():
-    user = request.form['username']
-    pwd = request.form['password']  # ***Should hash pwd.
 
-    ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
-    salt = ''.join([random.choice(ALL_CHARS) for _ in range(10)])
-    saltB = salt.encode()
-    saltedandhashedpwd = hashlib.sha256(pwd.encode() + saltB).hexdigest()
+   user = request.form['username']
+   pwd = request.form['password']
 
-    userInfo = (
-    user, saltedandhashedpwd, salt, 0, 0, None)  # (id, username, password, salt, gamesWon, gamesPlayed, auToken)
-    result = postgresql_system("addUsersFull", userInfo)
+   if len(user)>10:
+       return render_template("home_page.html", replace="Invalid Username. Please sign-up with  maximum username length within 10 characters only.")
 
-    # Now user successfully signed-up, return to homepage.
-    return render_template("home_page.html",
-                           replace="You've successfully signed-up and registered an account, now you can sign-in to play!")
+
+   ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
+   for char in user:
+       if char not in ALL_CHARS:
+           return render_template("home_page.html", replace="Invalid Username. Please sign-up with using any upper or lower case letter and nummbers 1-10 only")
+
+   allUsers = postgresql_system("allUsers")
+   for exisitingUser in allUsers:
+       if exisitingUser[1] == user:
+           return render_template("home_page.html", replace="Username already exists, please sign up with a different username.")
+
+   #ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
+   salt = ''.join([random.choice(ALL_CHARS) for _ in range(10)])
+   saltB = salt.encode()
+   saltedandhashedpwd = hashlib.sha256(pwd.encode() + saltB).hexdigest()
+
+   userInfo = (user, saltedandhashedpwd, salt, 0, 0, None)  #(id, username, password, salt, gamesWon, gamesPlayed, auToken)
+   result = postgresql_system("addUsersFull", userInfo)
+   
+   #Now user successfully signed-up, return to homepage.
+   return render_template("home_page.html", replace="You've successfully signed-up and registered an account, now you can sign-in to play!")
 
 
 @app.route('/login', methods=['POST', 'GET'])
