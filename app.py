@@ -189,7 +189,10 @@ def join_lobby():
     if auth_token is None:
         return "You must logged in to join a lobby."
     hashed_auth_token = hashlib.sha256(auth_token.encode()).hexdigest()
-    username = postgresql_system("getUserByAuthToken", values=hashed_auth_token)[0]
+    if postgresql_system("getUserByAuthToken", values=hashed_auth_token) is not None:
+        username = postgresql_system("getUserByAuthToken", values=hashed_auth_token)[0]
+    else:
+        return "You must logged in to join a lobby."
     print(f"FOUND USERNAME: {username}", flush=True)
     if username is not None:
         lobbies_open = sum(1 for lob in lobbies if len(lob) != 2)
