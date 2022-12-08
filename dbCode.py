@@ -18,7 +18,7 @@ def postgresql_system(operation, values=None, values2=None):
     db_host = "DB_postgreSQL"
     database = "MathGameDB"
     username = "user345"
-    pwd = CHANGEME 
+    pwd = "CHANGEME"
     #hard coded password --> get from .env file? be reading it? --> and set those variables to CHANGEME in docker-compose.yml file
     port_id = 5432
 
