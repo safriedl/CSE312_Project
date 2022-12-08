@@ -186,6 +186,8 @@ def join_lobby():
     cookies = request.cookies
     print(cookies, flush=True)
     auth_token = cookies.get('userAuToken')
+    if auth_token is None:
+        return "You must logged in to join a lobby."
     hashed_auth_token = hashlib.sha256(auth_token.encode()).hexdigest()
     username = postgresql_system("getUserByAuthToken", values=hashed_auth_token)[0]
     print(f"FOUND USERNAME: {username}", flush=True)
