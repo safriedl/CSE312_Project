@@ -1,6 +1,7 @@
 FROM python:3.9.5-slim
 ENV HOME /root
 WORKDIR /root
+FROM alpine
 
 COPY . .
 

@@ -18,7 +18,8 @@ def postgresql_system(operation, values=None, values2=None):
     db_host = "DB_postgreSQL"
     database = "MathGameDB"
     username = "user345"
-    pwd = "password345"
+    pwd = CHANGEME 
+    #hard coded password --> get from .env file? be reading it? --> and set those variables to CHANGEME in docker-compose.yml file
     port_id = 5432
 
     conn = None
@@ -28,7 +29,7 @@ def postgresql_system(operation, values=None, values2=None):
             host=db_host,
             dbname=database,
             user=username,
-            password=pwd,
+            password=pwd, 
             port=port_id
         )
         cur = conn.cursor()

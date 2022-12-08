@@ -14,5 +14,3 @@ def generate_question():
     ans = eval(question)
     return question, round(ans, 4)
 
-def example():
-    print('example')
