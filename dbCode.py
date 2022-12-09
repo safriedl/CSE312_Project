@@ -4,7 +4,7 @@ import psycopg2
 db_host = "DB_postgreSQL"
 database = "MathGameDB"
 username = "user345"
-pwd = "password345"
+pwd = "CHANGEME"
 port_id = 5432
 
 
