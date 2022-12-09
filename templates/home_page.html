@@ -37,7 +37,7 @@
 
 
 
-    <div style="padding: 10px; background-color: #00ffa7; margin: 20px">
+    <div style="padding: 10px; background-color: darkcyan; margin: 20px">
         <p style="font-size: 20px">WELCOME TO MATH DUELS</p>
     </div>
 
@@ -45,10 +45,10 @@
 
 
 
-    <p style='background-color:red;'>You are currently not logged in, please sign-up and login to play the game.</p>
+    <p style='background-color:red;' class="notloggedin">You are currently not logged in, please sign-up and login to play the game.</p>
 
-    <h1>New User? Sign-Up:</h1>
-    <form action="/signup" id="sign-up" method="post">
+    <h3 class="addMargin">New User? Sign-Up:</h3>
+    <form action="/signup" id="sign-up" method="post" class="addMargin">
 
         <label for="username">Username: </label>
         <input id="username" type="text" name="username">
@@ -62,9 +62,8 @@
 
 
 
-    <br />
-    <h1>Or login:</h1>
-    <form action="/login" id="login" method="post">
+    <h3 class="addMargin">Or login:</h3>
+    <form action="/login" id="login" method="post" class="addMargin">
 
         <label for="username">Username: </label>
         <input id="username" type="text" name="username">
@@ -76,7 +75,7 @@
 
     </form>
 
-    <p><b><i> {{ replace }} </i></b></p>
+    <h3 class="addMargin"><b><i> {{ replace }} </i></b></h3>
 
 </body>
 </html>

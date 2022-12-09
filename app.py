@@ -42,13 +42,13 @@ def escape_html(text):
 # Given the token, get user all info. May be used by any route that requires checking if user is authenticated and requires getting the user info.
 def getUserWithToken(auToken):
     hashed_auth_token = hashlib.sha256(auToken.encode()).hexdigest()
-    print(hashed_auth_token)
+    #print(hashed_auth_token)
     users = postgresql_system("allUsers")
     for u in users:
-        print(u)
+        #print(u)
         if u[6] == hashed_auth_token:
             return u  # u = #(id, username, password, salt, gamesWon, gamesPlayed, auToken)
-    print("END")
+    #print("END")
     return None
 
 
@@ -82,7 +82,7 @@ def sign_up():
    ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
    for char in user:
        if char not in ALL_CHARS:
-           return render_template("home_page.html", replace="Invalid Username. Please sign-up with using any upper or lower case letter and nummbers 1-10 only")
+           return render_template("home_page.html", replace="Invalid Username. Please sign-up with using any upper or lower case letter and numbers 1-10 only")
 
    allUsers = postgresql_system("allUsers")
    for exisitingUser in allUsers:
@@ -127,7 +127,7 @@ def login():
         result = postgresql_system("Update_auth_token", hashed_auth_token, user_name)
 
         resp = make_response(
-            render_template("home_page_au.html", username=info[1]))  # sets in the http headers earlier here.
+            render_template("home_page_au.html", user=info[1]))  # sets in the http headers earlier here.
         resp.set_cookie('userAuToken', auth_token)  # Set the cookie in the http response.
         return resp  # Now, users are logged in, and accessing any route will check if they have an auth_token, and serve custom responses. For example, requesting homepage will serve authorized homepage with username shown.
 
@@ -149,13 +149,70 @@ def profile():
         username = info[1]
         wins = info[4]
         games_played = info[5]
-        return render_template('user_profile_template.html', wins=wins, played=games_played, user=username)
+        return render_template('user_profile_template.html', wins=wins, played=games_played, user=username, replace="")
 
     else:
         return render_template("home_page.html",
                                replace="Please Login first to access your profile.")  # abort(404) #or may send a redirect to homepage.
 
 
+
+
+# has been modified it to directly use the auth_token instead.
+@app.route('/updateUsername', methods=['POST'])
+def updateUsername():
+    auth_token = request.cookies.get('userAuToken')  # 1. get auToken.
+    user = request.form['username']
+
+    info = getUserWithToken(
+        auth_token) if auth_token != None else None  # 2. get user_info for the auToken, if auToken exists and valid.
+
+    if info != None:  # 3. Then authenticated.
+       if len(user)>10:
+           username = info[1]
+           wins = info[4]
+           games_played = info[5]
+           return render_template('user_profile_template.html', wins=wins, played=games_played, user=username, replace="Cannot save new username, maximum username length within 10 characters only.")
+
+       ALL_CHARS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
+       for char in user:
+           if char not in ALL_CHARS:
+               username = info[1]
+               wins = info[4]
+               games_played = info[5]
+               return render_template('user_profile_template.html', wins=wins, played=games_played, user=username, replace="Cannot save new username, must use any upper or lower case letter and numbers 1-10 only.")
+
+       allUsers = postgresql_system("allUsers")
+       for exisitingUser in allUsers:
+           if exisitingUser[1] == user:
+               username = info[1]
+               wins = info[4]
+               games_played = info[5]
+               return render_template('user_profile_template.html', wins=wins, played=games_played, user=username, replace="Cannot save new username, username already exists.")
+
+
+       result = postgresql_system("updateUsername", user, info[6])
+       #Now user successfully updated username
+       username = info[1]
+       wins = info[4]
+       games_played = info[5]
+       return render_template('user_profile_template.html', wins=wins, played=games_played, user=user, replace="New Username Saved.")
+
+
+    else:
+        return abort(404) #Should not even access profile without valid auth_Token.
+
+
+
+
+
+
+
+@app.route('/logout')
+def log_out():
+    resp = make_response(render_template("home_page.html", replace="You have logged out."))
+    resp.set_cookie('userAuToken', '', max_age=0)
+    return resp
 # --END OF NEW EDITED CODE--
 
 
@@ -211,7 +268,8 @@ def join_lobby():
                         return render_template("lobby.html", user=username, num=lobbies.index(lob),
                                                async_mode="gevent")
     else:
-        return "You must logged in to join a lobby."
+        return render_template("home_page.html",
+                               replace="You must logged in to join a lobby.")
 
 
 @app.route('/functions.js')

@@ -1,9 +1,9 @@
 import psycopg2
 
-# Connecting to Database. May need to change if setting up to connect to a local repo.
+# Connecting to Database. May need to change if setting up to connect to a local db.
 db_host = "DB_postgreSQL"
 database = "MathGameDB"
-username = "user345"
+db_username = "user345"
 pwd = "CHANGEME"
 port_id = 5432
 
@@ -24,7 +24,7 @@ def postgresql_system(operation, values=None, values2=None):
         conn = psycopg2.connect(
             host=db_host,
             dbname=database,
-            user=username,
+            user=db_username,
             password=pwd,
             port=port_id
         )
@@ -89,7 +89,11 @@ def postgresql_system(operation, values=None, values2=None):
 
             tuple = cur.fetchone()
             result = tuple
-        # elif operation == "":
+
+        elif operation == "updateUsername":
+            update_script = '''UPDATE users SET username = %s
+                                where auth_token = %s'''
+            cur.execute(update_script, (values, values2))
         # else:
         conn.commit()
     except Exception as error:
@@ -110,7 +114,7 @@ def CreateTables():
         conn = psycopg2.connect(
             host=db_host,
             dbname=database,
-            user=username,
+            user=db_username,
             password=pwd,
             port=port_id
         )
